@@ -102,7 +102,7 @@ export class CityAutocomplete {
   performSearch() {
     const searchQuery = this.inputElement.value.trim();
 
-    if (searchQuery.length < 2) {
+    if (searchQuery.length < 3) {
       this.closeResults();
       return;
     }
@@ -126,7 +126,7 @@ export class CityAutocomplete {
    */
   handleKeyDown(event) {
     if (!this.isOpen) {
-      if (event.key === 'ArrowDown' && this.inputElement.value.trim().length >= 2) {
+      if (event.key === 'ArrowDown' && this.inputElement.value.trim().length >= 3) {
         event.preventDefault();
         this.performSearch();
       }

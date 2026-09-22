@@ -72,8 +72,8 @@ export class CityRepository {
 
     const normalizedQuery = this.normalizeText(searchQuery);
 
-    // Minimum requirement: search begins at 2 characters
-    if (normalizedQuery.length < 2) {
+    // Minimum requirement: search begins at 3 characters
+    if (normalizedQuery.length < 3) {
       return [];
     }
 
