@@ -31,6 +31,18 @@ export class ForecastView {
    * @param {string} cityName
    */
   renderLoadingState(cityName) {
+    const existingResultElement = this.containerElement.querySelector('.forecast-result');
+
+    // If result shell is already mounted, show subtle loading state without destroying DOM
+    if (existingResultElement !== null) {
+      const citySubtitleElement = existingResultElement.querySelector('.forecast-city-subtitle');
+      if (citySubtitleElement !== null) {
+        citySubtitleElement.textContent = `Loading forecast for ${cityName}...`;
+      }
+      existingResultElement.classList.add('forecast-result--loading');
+      return;
+    }
+
     this.containerElement.innerHTML = `
       <section class="forecast-loading" role="status" aria-live="polite">
         <div class="loading-spinner" aria-hidden="true"></div>
@@ -57,13 +69,14 @@ export class ForecastView {
   }
 
   /**
-   * Renders the 5-day weather forecast table for the selected city.
+   * Renders or updates the 5-day weather forecast table for the selected city.
    *
    * @param {object} params
    * @param {{name: string, country: string}} params.city
    * @param {Array<{date: Date, minimumTemperature: number, maximumTemperature: number, condition: string, weatherIcon: string}>} params.dailyForecastList
+   * @param {() => void} [params.onChartTabActivated]
    */
-  renderForecast({ city, dailyForecastList }) {
+  renderForecast({ city, dailyForecastList, onChartTabActivated = undefined }) {
     if (dailyForecastList.length === 0) {
       this.renderErrorState('No forecast data available for this location.');
       return;
@@ -104,6 +117,28 @@ export class ForecastView {
       `;
     }
 
+    const existingResultElement = this.containerElement.querySelector('.forecast-result');
+
+    // In-place update: reuse existing DOM elements, preserving canvas and active tab
+    if (existingResultElement !== null) {
+      existingResultElement.classList.remove('forecast-result--loading');
+      const cityTitleElement = existingResultElement.querySelector('.forecast-city-title');
+      const citySubtitleElement = existingResultElement.querySelector('.forecast-city-subtitle');
+      const tableBodyElement = existingResultElement.querySelector('tbody');
+
+      if (cityTitleElement !== null) {
+        cityTitleElement.textContent = cityDisplayName;
+      }
+      if (citySubtitleElement !== null) {
+        citySubtitleElement.textContent = '5-Day Weather Forecast';
+      }
+      if (tableBodyElement !== null) {
+        tableBodyElement.innerHTML = tableRowsHtml;
+      }
+      return;
+    }
+
+    // Initial mount of the forecast result shell
     this.containerElement.innerHTML = `
       <section class="forecast-result" aria-live="polite">
         <header class="forecast-result-header">
@@ -160,6 +195,48 @@ export class ForecastView {
         </div>
       </section>
     `;
+
+    this.bindViewTabs(onChartTabActivated);
+  }
+
+  /**
+   * Binds click events to view toggle tab buttons.
+   *
+   * @param {() => void} [onChartTabActivated]
+   */
+  bindViewTabs(onChartTabActivated) {
+    const tableButton = this.containerElement.querySelector('#view-toggle-table');
+    const chartButton = this.containerElement.querySelector('#view-toggle-chart');
+    const tablePanel = this.containerElement.querySelector('#forecast-table-panel');
+    const chartPanel = this.containerElement.querySelector('#forecast-chart-panel');
+
+    if (tableButton === null || chartButton === null || tablePanel === null || chartPanel === null) {
+      return;
+    }
+
+    tableButton.addEventListener('click', () => {
+      tableButton.classList.add('view-toggle-button--active');
+      tableButton.setAttribute('aria-selected', 'true');
+      chartButton.classList.remove('view-toggle-button--active');
+      chartButton.setAttribute('aria-selected', 'false');
+
+      tablePanel.hidden = false;
+      chartPanel.hidden = true;
+    });
+
+    chartButton.addEventListener('click', () => {
+      chartButton.classList.add('view-toggle-button--active');
+      chartButton.setAttribute('aria-selected', 'true');
+      tableButton.classList.remove('view-toggle-button--active');
+      tableButton.setAttribute('aria-selected', 'false');
+
+      chartPanel.hidden = false;
+      tablePanel.hidden = true;
+
+      if (typeof onChartTabActivated === 'function') {
+        onChartTabActivated();
+      }
+    });
   }
 
   /**

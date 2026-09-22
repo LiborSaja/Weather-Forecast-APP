@@ -188,10 +188,14 @@ export class WeatherApplication {
       if (this.activeAbortController === abortController) {
         this.forecastView.renderForecast({
           city: displayCity,
-          dailyForecastList: dailyForecastList
+          dailyForecastList: dailyForecastList,
+          onChartTabActivated: () => {
+            if (this.forecastChartView !== null && this.forecastChartView.chartInstance !== null) {
+              this.forecastChartView.chartInstance.resize();
+            }
+          }
         });
 
-        this.setupViewTabs();
         this.renderForecastChart(dailyForecastList);
 
         this.activeAbortController = null;
@@ -212,7 +216,7 @@ export class WeatherApplication {
   }
 
   /**
-   * Instantiates and renders the temperature chart view.
+   * Instantiates or in-place updates the temperature chart view.
    *
    * @param {Array<{date: Date, minimumTemperature: number, maximumTemperature: number, condition: string, weatherIcon: string}>} dailyForecastList
    */
@@ -224,7 +228,7 @@ export class WeatherApplication {
       return;
     }
 
-    if (this.forecastChartView === null) {
+    if (this.forecastChartView === null || this.forecastChartView.canvasElement !== canvasElement) {
       this.forecastChartView = new ForecastChartView({
         canvasElement: canvasElement,
         containerElement: chartPanelElement
@@ -234,45 +238,6 @@ export class WeatherApplication {
     this.forecastChartView.renderChart({
       dailyForecastList: dailyForecastList,
       localeFormatter: this.localeFormatter
-    });
-  }
-
-  /**
-   * Binds click events to the Table / Chart tab buttons.
-   */
-  setupViewTabs() {
-    const tableButton = document.getElementById('view-toggle-table');
-    const chartButton = document.getElementById('view-toggle-chart');
-    const tablePanel = document.getElementById('forecast-table-panel');
-    const chartPanel = document.getElementById('forecast-chart-panel');
-
-    if (tableButton === null || chartButton === null || tablePanel === null || chartPanel === null) {
-      return;
-    }
-
-    tableButton.addEventListener('click', () => {
-      tableButton.classList.add('view-toggle-button--active');
-      tableButton.setAttribute('aria-selected', 'true');
-      chartButton.classList.remove('view-toggle-button--active');
-      chartButton.setAttribute('aria-selected', 'false');
-
-      tablePanel.hidden = false;
-      chartPanel.hidden = true;
-    });
-
-    chartButton.addEventListener('click', () => {
-      chartButton.classList.add('view-toggle-button--active');
-      chartButton.setAttribute('aria-selected', 'true');
-      tableButton.classList.remove('view-toggle-button--active');
-      tableButton.setAttribute('aria-selected', 'false');
-
-      chartPanel.hidden = false;
-      tablePanel.hidden = true;
-
-      // Trigger resize update on Chart.js when canvas becomes visible
-      if (this.forecastChartView !== null && this.forecastChartView.chartInstance !== null) {
-        this.forecastChartView.chartInstance.resize();
-      }
     });
   }
 }

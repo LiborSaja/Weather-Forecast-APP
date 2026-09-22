@@ -27,15 +27,13 @@ export class ForecastChartView {
   }
 
   /**
-   * Renders the 5-day temperature evolution chart.
+   * Renders or smoothly updates the 5-day temperature evolution chart.
    *
    * @param {object} params
    * @param {Array<{date: Date, minimumTemperature: number, maximumTemperature: number, condition: string, weatherIcon: string}>} params.dailyForecastList
    * @param {import('../localization/LocaleFormatter.js').LocaleFormatter} params.localeFormatter
    */
   renderChart({ dailyForecastList, localeFormatter }) {
-    this.destroy();
-
     if (dailyForecastList.length === 0) {
       return;
     }
@@ -51,6 +49,15 @@ export class ForecastChartView {
       labelList.push(formattedDate);
       minimumTemperatureList.push(Math.round(forecastItem.minimumTemperature));
       maximumTemperatureList.push(Math.round(forecastItem.maximumTemperature));
+    }
+
+    // If chart already exists, update data in-place without destroying or re-allocating memory
+    if (this.chartInstance !== null) {
+      this.chartInstance.data.labels = labelList;
+      this.chartInstance.data.datasets[0].data = maximumTemperatureList;
+      this.chartInstance.data.datasets[1].data = minimumTemperatureList;
+      this.chartInstance.update();
+      return;
     }
 
     const chartContext = this.canvasElement.getContext('2d');
