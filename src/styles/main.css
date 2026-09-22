@@ -1,0 +1,587 @@
+/* ==========================================================================
+   Base & Reset
+   ========================================================================== */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+:root {
+  --color-primary: #2563eb;
+  --color-primary-hover: #1d4ed8;
+  --color-primary-light: #eff6ff;
+  --color-text-main: #0f172a;
+  --color-text-muted: #64748b;
+  --color-background: #f8fafc;
+  --color-card-bg: #ffffff;
+  --color-border: #e2e8f0;
+  --color-border-hover: #cbd5e1;
+  --color-highlight: #f1f5f9;
+  --color-error-bg: #fef2f2;
+  --color-error-border: #fecaca;
+  --color-error-text: #991b1b;
+  --color-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  --color-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+  --transition-fast: 0.15s ease;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--color-background);
+  color: var(--color-text-main);
+  line-height: 1.5;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ==========================================================================
+   Layout
+   ========================================================================== */
+.app-container {
+  max-width: 860px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  flex: 1;
+}
+
+/* Header */
+.app-header {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.app-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-text-main);
+  letter-spacing: -0.025em;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.app-subtitle {
+  font-size: 1rem;
+  color: var(--color-text-muted);
+}
+
+/* Main Content */
+.app-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* Search Section */
+.search-section {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.search-bar-row {
+  display: flex;
+  align-items: stretch;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.search-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-text-main);
+}
+
+.autocomplete-wrapper {
+  position: relative;
+  flex: 1;
+}
+
+/* Geolocation Button */
+.geolocation-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.85rem 1.15rem;
+  background-color: var(--color-card-bg);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-main);
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: var(--color-shadow);
+  transition: all var(--transition-fast);
+}
+
+.geolocation-button:hover:not(:disabled) {
+  border-color: var(--color-primary);
+  background-color: var(--color-primary-light);
+  color: var(--color-primary);
+}
+
+.geolocation-button:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
+}
+
+.geolocation-button:disabled {
+  background-color: var(--color-highlight);
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.geolocation-icon {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.85rem 2.85rem 0.85rem 1.15rem;
+  font-size: 1rem;
+  font-family: inherit;
+  color: var(--color-text-main);
+  background-color: var(--color-card-bg);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  outline: none;
+  box-shadow: var(--color-shadow);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.search-input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.search-input:disabled {
+  background-color: var(--color-highlight);
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+}
+
+/* Clear Button */
+.search-clear-button {
+  position: absolute;
+  right: 0.85rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  color: var(--color-text-muted);
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+  user-select: none;
+}
+
+.search-clear-button[hidden] {
+  display: none !important;
+}
+
+.search-clear-button:hover {
+  background-color: var(--color-border);
+  color: var(--color-text-main);
+}
+
+.search-clear-button:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
+}
+
+/* Autocomplete Dropdown */
+.autocomplete-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background-color: var(--color-card-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--color-shadow-lg);
+  max-height: 280px;
+  overflow-y: auto;
+  z-index: 1000;
+}
+
+.autocomplete-list {
+  list-style: none;
+  padding: 0.35rem 0;
+  margin: 0;
+}
+
+.autocomplete-option {
+  padding: 0.75rem 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+  font-size: 0.95rem;
+}
+
+.autocomplete-option--highlighted,
+.autocomplete-option:hover {
+  background-color: var(--color-primary-light);
+  color: var(--color-primary);
+}
+
+.autocomplete-option-name {
+  font-weight: 500;
+}
+
+.autocomplete-option-country {
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.15rem 0.45rem;
+  background-color: var(--color-highlight);
+  color: var(--color-text-muted);
+  border-radius: var(--radius-sm);
+  text-transform: uppercase;
+}
+
+.autocomplete-option--highlighted .autocomplete-option-country {
+  background-color: #dbeafe;
+  color: var(--color-primary);
+}
+
+.autocomplete-empty {
+  padding: 1rem;
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+
+/* Forecast Container */
+.forecast-section {
+  background-color: var(--color-card-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--color-shadow);
+  padding: 1.75rem;
+  min-height: 320px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Placeholder / Ready State */
+.forecast-placeholder {
+  text-align: center;
+  padding: 2.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.forecast-placeholder-icon {
+  font-size: 3rem;
+  margin-bottom: 0.25rem;
+}
+
+.forecast-placeholder-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text-main);
+}
+
+.forecast-placeholder-text {
+  font-size: 0.95rem;
+  color: var(--color-text-muted);
+  max-width: 380px;
+}
+
+/* Loading State */
+.forecast-loading {
+  text-align: center;
+  padding: 3rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3.5px solid var(--color-border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-text {
+  font-size: 0.95rem;
+  color: var(--color-text-muted);
+}
+
+/* Error State */
+.forecast-error {
+  width: 100%;
+  background-color: var(--color-error-bg);
+  border: 1px solid var(--color-error-border);
+  border-radius: var(--radius-md);
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  color: var(--color-error-text);
+}
+
+.error-icon {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.error-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.error-title {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.error-message {
+  font-size: 0.9rem;
+  line-height: 1.4;
+  color: #7f1d1d;
+}
+
+/* Forecast Result State */
+.forecast-result {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.forecast-result-header {
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.forecast-result-header-main {
+  display: flex;
+  flex-direction: column;
+}
+
+.forecast-city-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-text-main);
+  letter-spacing: -0.02em;
+}
+
+.forecast-city-subtitle {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  margin-top: 0.15rem;
+}
+
+/* View Toggle Tabs */
+.view-toggle-group {
+  display: inline-flex;
+  background-color: var(--color-highlight);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 0.25rem;
+  gap: 0.25rem;
+}
+
+.view-toggle-button {
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 0.45rem 0.85rem;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.view-toggle-button:hover:not(.view-toggle-button--active) {
+  color: var(--color-text-main);
+}
+
+.view-toggle-button--active {
+  background-color: var(--color-card-bg);
+  color: var(--color-primary);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.forecast-view-panel {
+  width: 100%;
+}
+
+/* Chart Container */
+.forecast-chart-wrapper {
+  width: 100%;
+  height: 320px;
+  position: relative;
+  padding: 0.5rem 0;
+}
+
+/* Forecast Table */
+.forecast-table-container {
+  overflow-x: auto;
+  width: 100%;
+}
+
+.forecast-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  text-align: left;
+}
+
+.forecast-table th {
+  padding: 0.75rem 1rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+  border-bottom: 2px solid var(--color-border);
+}
+
+.forecast-table td {
+  padding: 1rem 1rem;
+  font-size: 0.95rem;
+  border-bottom: 1px solid var(--color-border);
+  vertical-align: middle;
+}
+
+.forecast-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.forecast-table tbody tr:hover td {
+  background-color: #f8fafc;
+}
+
+.table-cell-date {
+  font-weight: 600;
+  color: var(--color-text-main);
+  text-transform: capitalize;
+}
+
+.table-cell-min-temp {
+  color: #3b82f6;
+  font-weight: 500;
+}
+
+.table-cell-max-temp {
+  color: #ef4444;
+  font-weight: 600;
+}
+
+.weather-condition-wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.weather-icon {
+  width: 36px;
+  height: 36px;
+  display: block;
+}
+
+.weather-condition-label {
+  font-weight: 500;
+  color: var(--color-text-main);
+}
+
+/* Footer */
+.app-footer {
+  margin-top: auto;
+  text-align: center;
+  padding: 1.5rem;
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  border-top: 1px solid var(--color-border);
+}
+
+/* ==========================================================================
+   Responsive Adaptations
+   ========================================================================== */
+@media (max-width: 640px) {
+  .app-container {
+    padding: 1.5rem 1rem;
+    gap: 1.5rem;
+  }
+
+  .app-title {
+    font-size: 1.6rem;
+  }
+
+  .forecast-section {
+    padding: 1rem;
+  }
+
+  .forecast-table th,
+  .forecast-table td {
+    padding: 0.75rem 0.5rem;
+    font-size: 0.85rem;
+  }
+
+  .weather-icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .weather-condition-wrapper {
+    gap: 0.25rem;
+  }
+}

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Weather Forecast Application</title>
+    <link rel="stylesheet" href="/src/styles/main.css" />
+  </head>
+  <body>
+    <div class="app-container">
+      <header class="app-header">
+        <h1 class="app-title">
+          <span>🌦️</span> Weather Forecast
+        </h1>
+        <p class="app-subtitle">Search for a city to see the 5-day weather forecast</p>
+      </header>
+
+      <main class="app-main">
+        <section class="search-section" aria-label="City search">
+          <label for="city-search-input" class="search-label">Select City</label>
+          <div class="search-bar-row">
+            <div class="autocomplete-wrapper">
+              <input
+                type="text"
+                id="city-search-input"
+                class="search-input"
+                placeholder="Search for a city (e.g. Prague, London)..."
+                autocomplete="off"
+                spellcheck="false"
+                disabled
+              />
+              <button
+                type="button"
+                id="city-search-clear-button"
+                class="search-clear-button"
+                aria-label="Clear search input"
+                title="Clear search"
+                hidden
+              >&times;</button>
+              <div
+                id="city-autocomplete-dropdown"
+                class="autocomplete-dropdown"
+                hidden
+              ></div>
+            </div>
+
+            <button
+              type="button"
+              id="geolocation-button"
+              class="geolocation-button"
+              aria-label="Use current location"
+              title="Detect and use my current location"
+            >
+              <span class="geolocation-icon" aria-hidden="true">📍</span>
+              <span class="geolocation-label">My Location</span>
+            </button>
+          </div>
+        </section>
+
+        <section id="forecast-container" class="forecast-section" aria-live="polite">
+          <!-- Forecast states (initial prompt, loading, table, error) dynamically rendered here -->
+        </section>
+      </main>
+
+      <footer class="app-footer">
+        <p>Weather Forecast Single Page Application &bull; Powered by OpenWeather API</p>
+      </footer>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
