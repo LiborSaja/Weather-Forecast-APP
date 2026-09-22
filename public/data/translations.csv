@@ -1,0 +1,44 @@
+key,cs,en,de,es,fr
+app.title,Předpověď počasí,Weather Forecast,Wettervorhersage,Pronóstico del tiempo,Prévisions météo
+app.subtitle,Vyhledejte město a zobrazte 5denní předpověď počasí,Search for a city to see the 5-day weather forecast,Suchen Sie nach einer Stadt für die 5-Tage-Vorhersage,Busque una ciudad para ver el pronóstico de 5 días,Recherchez une ville pour voir les prévisions à 5 jours
+app.footer,Aplikace pro předpověď počasí • Poháněno OpenWeather API,Weather Forecast Single Page Application • Powered by OpenWeather API,Wettervorhersage Single Page App • Powered by OpenWeather API,Aplicación de pronóstico del tiempo • Desarrollado por OpenWeather API,Application de prévisions météo • Propulsé par OpenWeather API
+search.label,Vyberte město,Select City,Stadt auswählen,Seleccionar ciudad,Sélectionner une ville
+search.placeholder,Hledat město (např. Praha, Londýn)...,Search for a city (e.g. Prague, London)...,Stadt suchen (z. B. Berlin, Wien)...,Buscar ciudad (ej. Madrid, Barcelona)...,Rechercher une ville (ex. Paris, Lyon)...
+search.loadingCities,Načítání seznamu měst...,Loading cities dataset...,Städtedaten werden geladen...,Cargando lista de ciudades...,Chargement de la liste des villes...
+search.loadFailed,Nepodařilo se načíst města,Failed to load cities,Städte konnten nicht geladen werden,Error al cargar ciudades,Échec du chargement des villes
+search.noResults,Nebylo nalezeno žádné odpovídající město,No matching cities found,Keine passenden Städte gefunden,No se encontraron ciudades coincidentes,Aucune ville correspondante trouvée
+search.clearAria,Vymazat vyhledávání,Clear search input,Sucheingabe löschen,Borrar búsqueda,Effacer la recherche
+geolocation.button,Moje poloha,My Location,Mein Standort,Mi ubicación,Ma position
+geolocation.loadingLocation,vaši aktuální polohu,your current location,Ihren aktuellen Standort,su ubicación actual,votre position actuelle
+geolocation.currentPrefix,Moje poloha,My Location,Mein Standort,Mi ubicación,Ma position
+placeholder.title,Vyberte město,Choose a City,Wählen Sie eine Stadt,Elija una ciudad,Choisissez une ville
+placeholder.text,Zadejte název města do vyhledávacího pole a zobrazte předpověď na 5 dní.,Type a city name in the search box above to view the 5-day weather forecast.,Geben Sie oben einen Stadtnamen ein um die 5-Tage-Wettervorhersage zu sehen.,Escriba el nombre de una ciudad arriba para ver el pronóstico de 5 días.,Tapez un nom de ville ci-dessus pour afficher les prévisions sur 5 jours.
+loading.textPrefix,Načítání 5denní předpovědi pro,Loading 5-day forecast for,Lade 5-Tage-Vorhersage für,Cargando pronóstico de 5 días para,Chargement des prévisions à 5 jours pour
+error.title,Předpověď se nepodařilo načíst,Unable to load forecast,Vorhersage konnte nicht geladen werden,No se pudo cargar el pronóstico,Impossible de charger les prévisions
+error.noData,Pro tuto lokalitu nejsou k dispozici žádná data předpovědi.,No forecast data available for this location.,Keine Vorhersagedaten für diesen Ort verfügbar.,No hay datos de pronóstico disponibles para esta ubicación.,Aucune donnée de prévision disponible pour cet emplacement.
+error.datasetFailed,Nepodařilo se načíst databázi měst. Zkontrolujte prosím soubor city.list.json a obnovte stránku.,Could not load the city dataset. Please verify that the city.list.json file exists and reload the page.,Städtedatensatz konnte nicht geladen werden. Bitte überprüfen Sie die Datei city.list.json.,No se pudo cargar el conjunto de datos de ciudades. Verifique city.list.json.,Impossible de charger la base de villes. Veuillez vérifier le fichier city.list.json.
+forecast.subtitle,5denní předpověď počasí,5-Day Weather Forecast,5-Tage-Wettervorhersage,Pronóstico del tiempo a 5 días,Prévisions météo à 5 jours
+view.table,📋 Tabulka,📋 Table,📋 Tabelle,📋 Tabla,📋 Tableau
+view.chart,📈 Graf,📈 Chart,📈 Diagramm,📈 Gráfico,📈 Graphique
+table.date,Datum,Date,Datum,Fecha,Date
+table.minTemp,Min. teplota,Min Temperature,Min. Temperatur,Temp. mínima,Temp. minimale
+table.maxTemp,Max. teplota,Max Temperature,Max. Temperatur,Temp. máxima,Temp. maximale
+table.weather,Počasí,Weather,Wetter,Clima,Météo
+chart.maxDataset,Max. teplota (°C),Max Temperature (°C),Höchsttemperatur (°C),Temp. máxima (°C),Temp. maximale (°C)
+chart.minDataset,Min. teplota (°C),Min Temperature (°C),Tiefsttemperatur (°C),Temp. mínima (°C),Temp. minimale (°C)
+condition.Clear,Jasno,Clear,Klar,Despejado,Dégagé
+condition.Clouds,Oblačno,Clouds,Bewölkt,Nublado,Nuageux
+condition.Rain,Déšť,Rain,Regen,Lluvia,Pluie
+condition.Snow,Sníh,Snow,Schnee,Nieve,Neige
+condition.Thunderstorm,Bouřka,Thunderstorm,Gewitter,Tormenta,Orage
+condition.Drizzle,Mrholení,Drizzle,Nieselregen,Llovizna,Bruine
+condition.Mist,Mlha,Mist,Nebel,Neblina,Brume
+condition.Fog,Mlha,Fog,Nebel,Niebla,Brouillard
+condition.Haze,Kouřmo,Haze,Dunst,Calina,Brume sèche
+condition.Smoke,Kouř,Smoke,Rauch,Humo,Fumée
+condition.Dust,Prach,Dust,Staub,Polvo,Poussière
+condition.Sand,Písek,Sand,Sand,Arena,Sable
+condition.Ash,Popílek,Ash,Asche,Ceniza,Cendre
+condition.Squall,Húlava,Squall,Böe,Chubasco,Rafale
+condition.Tornado,Tornádo,Tornado,Tornado,Tornado,Tornade
+condition.Unknown,Neznámé,Unknown,Unbekannt,Desconocido,Inconnu
