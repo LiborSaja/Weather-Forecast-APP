@@ -3,7 +3,7 @@ app.title,Předpověď počasí,Weather Forecast,Wettervorhersage,Pronóstico de
 app.subtitle,Vyhledejte město a zobrazte 5denní předpověď počasí,Search for a city to see the 5-day weather forecast,Suchen Sie nach einer Stadt für die 5-Tage-Vorhersage,Busque una ciudad para ver el pronóstico de 5 días,Recherchez une ville pour voir les prévisions à 5 jours
 app.footer,Aplikace pro předpověď počasí • Poháněno OpenWeather API,Weather Forecast Single Page Application • Powered by OpenWeather API,Wettervorhersage Single Page App • Powered by OpenWeather API,Aplicación de pronóstico del tiempo • Desarrollado por OpenWeather API,Application de prévisions météo • Propulsé par OpenWeather API
 search.label,Vyberte město,Select City,Stadt auswählen,Seleccionar ciudad,Sélectionner une ville
-search.placeholder,Hledat město (např. Praha, Londýn)...,Search for a city (e.g. Prague, London)...,Stadt suchen (z. B. Berlin, Wien)...,Buscar ciudad (ej. Madrid, Barcelona)...,Rechercher une ville (ex. Paris, Lyon)...
+search.placeholder,"Hledat město (např. Praha, Londýn)...","Search for a city (e.g. Prague, London)...","Stadt suchen (z. B. Berlin, Wien)...","Buscar ciudad (ej. Madrid, Barcelona)...","Rechercher une ville (ex. Paris, Lyon)..."
 search.loadingCities,Načítání seznamu měst...,Loading cities dataset...,Städtedaten werden geladen...,Cargando lista de ciudades...,Chargement de la liste des villes...
 search.loadFailed,Nepodařilo se načíst města,Failed to load cities,Städte konnten nicht geladen werden,Error al cargar ciudades,Échec du chargement des villes
 search.noResults,Nebylo nalezeno žádné odpovídající město,No matching cities found,Keine passenden Städte gefunden,No se encontraron ciudades coincidentes,Aucune ville correspondante trouvée

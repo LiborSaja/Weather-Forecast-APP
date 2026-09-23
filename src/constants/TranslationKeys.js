@@ -1,0 +1,33 @@
+/**
+ * Translation dictionary keys matching public/data/translations.csv.
+ */
+export const TRANSLATION_KEYS = Object.freeze({
+    APP_TITLE: "app.title",
+    APP_SUBTITLE: "app.subtitle",
+    APP_FOOTER: "app.footer",
+    SEARCH_LABEL: "search.label",
+    SEARCH_PLACEHOLDER: "search.placeholder",
+    SEARCH_LOADING_CITIES: "search.loadingCities",
+    SEARCH_LOAD_FAILED: "search.loadFailed",
+    SEARCH_NO_RESULTS: "search.noResults",
+    SEARCH_CLEAR_ARIA: "search.clearAria",
+    GEOLOCATION_BUTTON: "geolocation.button",
+    GEOLOCATION_LOADING_LOCATION: "geolocation.loadingLocation",
+    GEOLOCATION_CURRENT_PREFIX: "geolocation.currentPrefix",
+    PLACEHOLDER_TITLE: "placeholder.title",
+    PLACEHOLDER_TEXT: "placeholder.text",
+    LOADING_TEXT_PREFIX: "loading.textPrefix",
+    ERROR_TITLE: "error.title",
+    ERROR_NO_DATA: "error.noData",
+    ERROR_DATASET_FAILED: "error.datasetFailed",
+    FORECAST_SUBTITLE: "forecast.subtitle",
+    VIEW_TABLE: "view.table",
+    VIEW_CHART: "view.chart",
+    TABLE_DATE: "table.date",
+    TABLE_MIN_TEMP: "table.minTemp",
+    TABLE_MAX_TEMP: "table.maxTemp",
+    TABLE_WEATHER: "table.weather",
+    CHART_MAX_DATASET: "chart.maxDataset",
+    CHART_MIN_DATASET: "chart.minDataset",
+    CONDITION_UNKNOWN: "condition.Unknown",
+});

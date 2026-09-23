@@ -78,6 +78,8 @@ export class LocaleFormatter {
             return "-- °C";
         }
         const roundedTemperature = Math.round(temperatureInCelsius);
-        return `${this.temperatureFormatter.format(roundedTemperature)} °C`;
+        const normalizedTemperature =
+            roundedTemperature === 0 ? 0 : roundedTemperature;
+        return `${this.temperatureFormatter.format(normalizedTemperature)} °C`;
     }
 }

@@ -64,16 +64,24 @@ export class ForecastService {
                 });
             }
 
+            const primaryWeather =
+                Array.isArray(forecastItem.weather) &&
+                forecastItem.weather.length > 0
+                    ? forecastItem.weather[0]
+                    : null;
+
             groupedDaysMap.get(dayKey).items.push({
                 temperature: forecastItem.main.temp,
                 localHour: localHour,
                 condition:
-                    forecastItem.weather && forecastItem.weather.length > 0
-                        ? forecastItem.weather[0].main
+                    primaryWeather !== null &&
+                    typeof primaryWeather.main === "string"
+                        ? primaryWeather.main
                         : "Unknown",
                 weatherIcon:
-                    forecastItem.weather && forecastItem.weather.length > 0
-                        ? forecastItem.weather[0].icon
+                    primaryWeather !== null &&
+                    typeof primaryWeather.icon === "string"
+                        ? primaryWeather.icon
                         : "01d",
             });
         }

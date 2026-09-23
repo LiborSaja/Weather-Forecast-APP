@@ -1,8 +1,6 @@
 import Chart from "chart.js/auto";
+import { TRANSLATION_KEYS } from "../constants/TranslationKeys.js";
 
-/**
- * Handles rendering the interactive temperature trend chart using Chart.js.
- */
 export class ForecastChartView {
     /**
      * @param {object} options
@@ -22,9 +20,6 @@ export class ForecastChartView {
         this.chartInstance = null;
     }
 
-    /**
-     * Destroys the active Chart.js instance to prevent memory leaks and canvas conflicts.
-     */
     destroy() {
         if (this.chartInstance !== null) {
             this.chartInstance.destroy();
@@ -33,8 +28,6 @@ export class ForecastChartView {
     }
 
     /**
-     * Renders or smoothly updates the 5-day temperature evolution chart.
-     *
      * @param {object} params
      * @param {Array<{date: Date, minimumTemperature: number, maximumTemperature: number, condition: string, weatherIcon: string}>} params.dailyForecastList
      * @param {import('../localization/LocaleFormatter.js').LocaleFormatter} params.localeFormatter
@@ -63,20 +56,14 @@ export class ForecastChartView {
 
         const maxDatasetLabel =
             this.translationService !== null
-                ? this.translationService.t(
-                      "chart.maxDataset",
-                      "Max Temperature (°C)",
-                  )
+                ? this.translationService.t(TRANSLATION_KEYS.CHART_MAX_DATASET)
                 : "Max Temperature (°C)";
         const minDatasetLabel =
             this.translationService !== null
-                ? this.translationService.t(
-                      "chart.minDataset",
-                      "Min Temperature (°C)",
-                  )
+                ? this.translationService.t(TRANSLATION_KEYS.CHART_MIN_DATASET)
                 : "Min Temperature (°C)";
 
-        // If chart already exists, update data and labels in-place without destroying or re-allocating memory
+        // If chart already exists, update data and labels in place without destroying or re allocating memory
         if (this.chartInstance !== null) {
             this.chartInstance.data.labels = labelList;
             this.chartInstance.data.datasets[0].label = maxDatasetLabel;

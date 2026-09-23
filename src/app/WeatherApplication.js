@@ -7,10 +7,11 @@ import { ForecastChartView } from "../weather/ForecastChartView.js";
 import { GeolocationService } from "../geolocation/GeolocationService.js";
 import { LocaleFormatter } from "../localization/LocaleFormatter.js";
 import { TranslationService } from "../localization/TranslationService.js";
+import { DOM_IDS, DOM_SELECTORS } from "../constants/DomSelectors.js";
+import { TRANSLATION_KEYS } from "../constants/TranslationKeys.js";
+import { API_ENDPOINTS } from "../constants/ApiEndpoints.js";
+import { APP_CONFIG } from "../constants/AppConfig.js";
 
-/**
- * Main coordinator of the Weather Forecast application.
- */
 export class WeatherApplication {
     /**
      * @param {object} elements
@@ -37,13 +38,13 @@ export class WeatherApplication {
         this.forecastContainer = forecastContainer;
 
         this.translationService = new TranslationService(
-            "/data/translations.csv",
-            "cs",
+            API_ENDPOINTS.TRANSLATIONS_DATASET,
+            APP_CONFIG.DEFAULT_LANGUAGE,
         );
         this.localeFormatter = new LocaleFormatter(
             this.translationService.getIntlLocale(),
         );
-        this.cityRepository = new CityRepository("/data/city.list.json");
+        this.cityRepository = new CityRepository(API_ENDPOINTS.CITIES_DATASET);
         this.weatherApiClient = new OpenWeatherApiClient();
         this.forecastService = new ForecastService();
         this.geolocationService = new GeolocationService();
@@ -56,6 +57,7 @@ export class WeatherApplication {
 
         /** @type {AbortController|null} */
         this.activeAbortController = null;
+        this.currentGeolocationRequestId = 0;
         this.selectedCity = null;
         this.lastLoadedForecast = null;
 
@@ -64,11 +66,6 @@ export class WeatherApplication {
         this.handleLanguageChange = this.handleLanguageChange.bind(this);
     }
 
-    /**
-     * Starts the application by loading city datasets, translations, and initializing UI components.
-     *
-     * @returns {Promise<void>}
-     */
     async start() {
         if (this.geolocationButton !== null) {
             this.geolocationButton.addEventListener(
@@ -84,7 +81,6 @@ export class WeatherApplication {
         }
 
         try {
-            // Load translations dictionary first
             await this.translationService.loadTranslations();
             this.localeFormatter.setLocale(
                 this.translationService.getIntlLocale(),
@@ -100,16 +96,14 @@ export class WeatherApplication {
 
             this.searchInput.disabled = true;
             this.searchInput.placeholder = this.translationService.t(
-                "search.loadingCities",
-                "Loading cities dataset...",
+                TRANSLATION_KEYS.SEARCH_LOADING_CITIES,
             );
 
             await this.cityRepository.loadCities();
 
             this.searchInput.disabled = false;
             this.searchInput.placeholder = this.translationService.t(
-                "search.placeholder",
-                "Search for a city (e.g. Prague, London)...",
+                TRANSLATION_KEYS.SEARCH_PLACEHOLDER,
             );
 
             this.cityAutocomplete = new CityAutocomplete({
@@ -123,80 +117,71 @@ export class WeatherApplication {
         } catch (error) {
             this.searchInput.disabled = true;
             this.searchInput.placeholder = this.translationService.t(
-                "search.loadFailed",
-                "Failed to load cities",
+                TRANSLATION_KEYS.SEARCH_LOAD_FAILED,
             );
             this.forecastView.renderErrorState(
                 this.translationService.t(
-                    "error.datasetFailed",
-                    "Could not load the city dataset. Please verify that the city.list.json file exists and reload the page.",
+                    TRANSLATION_KEYS.ERROR_DATASET_FAILED,
                 ),
             );
             console.error("Failed to initialize application:", error);
         }
     }
 
-    /**
-     * Updates all static text elements in the DOM when language changes.
-     */
     updateStaticTranslations() {
-        const appTitleElement = document.getElementById("app-title-text");
-        const appSubtitleElement = document.getElementById("app-subtitle-text");
-        const searchLabelElement = document.querySelector(".search-label");
-        const geolocationLabelElement =
-            document.querySelector(".geolocation-label");
-        const footerParagraphElement = document.querySelector(".app-footer p");
+        const appTitleElement = document.getElementById(DOM_IDS.APP_TITLE_TEXT);
+        const appSubtitleElement = document.getElementById(
+            DOM_IDS.APP_SUBTITLE_TEXT,
+        );
+        const searchLabelElement = document.querySelector(
+            DOM_SELECTORS.SEARCH_LABEL,
+        );
+        const geolocationLabelElement = document.querySelector(
+            DOM_SELECTORS.GEOLOCATION_LABEL,
+        );
+        const footerParagraphElement = document.querySelector(
+            DOM_SELECTORS.FOOTER_PARAGRAPH,
+        );
 
         if (appTitleElement !== null) {
             appTitleElement.textContent = this.translationService.t(
-                "app.title",
-                "Weather Forecast",
+                TRANSLATION_KEYS.APP_TITLE,
             );
         }
         if (appSubtitleElement !== null) {
             appSubtitleElement.textContent = this.translationService.t(
-                "app.subtitle",
-                "Search for a city to see the 5-day weather forecast",
+                TRANSLATION_KEYS.APP_SUBTITLE,
             );
         }
         if (searchLabelElement !== null) {
             searchLabelElement.textContent = this.translationService.t(
-                "search.label",
-                "Select City",
+                TRANSLATION_KEYS.SEARCH_LABEL,
             );
         }
         if (geolocationLabelElement !== null) {
             geolocationLabelElement.textContent = this.translationService.t(
-                "geolocation.button",
-                "My Location",
+                TRANSLATION_KEYS.GEOLOCATION_BUTTON,
             );
         }
         if (footerParagraphElement !== null) {
             footerParagraphElement.textContent = this.translationService.t(
-                "app.footer",
-                "Weather Forecast Single Page Application • Powered by OpenWeather API",
+                TRANSLATION_KEYS.APP_FOOTER,
             );
         }
         if (this.clearButton !== null) {
             this.clearButton.setAttribute(
                 "aria-label",
-                this.translationService.t(
-                    "search.clearAria",
-                    "Clear search input",
-                ),
+                this.translationService.t(TRANSLATION_KEYS.SEARCH_CLEAR_ARIA),
             );
         }
         if (this.searchInput !== null && !this.searchInput.disabled) {
             this.searchInput.placeholder = this.translationService.t(
-                "search.placeholder",
-                "Search for a city (e.g. Prague, London)...",
+                TRANSLATION_KEYS.SEARCH_PLACEHOLDER,
             );
         }
     }
 
     /**
-     * Handles dynamic language switching across the entire UI and active forecast view.
-     *
      * @param {string} languageCode
      */
     handleLanguageChange(languageCode) {
@@ -229,17 +214,14 @@ export class WeatherApplication {
         }
     }
 
-    /**
-     * Handles user request to fetch forecast for their physical geolocation.
-     */
     async handleGeolocationClick() {
         if (this.geolocationButton !== null) {
             this.geolocationButton.disabled = true;
         }
 
+        const requestId = ++this.currentGeolocationRequestId;
         const loadingLocationText = this.translationService.t(
-            "geolocation.loadingLocation",
-            "your current location",
+            TRANSLATION_KEYS.GEOLOCATION_LOADING_LOCATION,
         );
         this.forecastView.renderLoadingState(loadingLocationText);
 
@@ -247,12 +229,16 @@ export class WeatherApplication {
             const coordinates =
                 await this.geolocationService.getCurrentCoordinates();
 
+            // If user initiated another action while geolocation was resolving, discard result
+            if (requestId !== this.currentGeolocationRequestId) {
+                return;
+            }
+
             // Placeholder city model until API returns the exact city name
             const locationCity = {
                 id: 0,
                 name: this.translationService.t(
-                    "geolocation.currentPrefix",
-                    "My Location",
+                    TRANSLATION_KEYS.GEOLOCATION_CURRENT_PREFIX,
                 ),
                 country: "",
                 coord: {
@@ -266,7 +252,9 @@ export class WeatherApplication {
                 isGeolocation: true,
             });
         } catch (error) {
-            this.forecastView.renderErrorState(error.message);
+            if (requestId === this.currentGeolocationRequestId) {
+                this.forecastView.renderErrorState(error.message);
+            }
         } finally {
             if (this.geolocationButton !== null) {
                 this.geolocationButton.disabled = false;
@@ -275,14 +263,15 @@ export class WeatherApplication {
     }
 
     /**
-     * Coordinates the forecast loading workflow when a user selects a city from autocomplete.
-     *
      * @param {{id: number, name: string, country: string, coord: {lat: number, lon: number}}} city
      */
     async handleCitySelected(city) {
         if (city === null || city === undefined) {
             return;
         }
+
+        // Invalidate any pending geolocation request
+        this.currentGeolocationRequestId++;
 
         await this.loadForecastForCoordinates({
             city: city,
@@ -291,8 +280,6 @@ export class WeatherApplication {
     }
 
     /**
-     * Performs the forecast fetch, data transformation, and UI rendering for given city coordinates.
-     *
      * @param {object} params
      * @param {{id: number, name: string, country: string, coord: {lat: number, lon: number}}} params.city
      * @param {boolean} params.isGeolocation
@@ -392,15 +379,11 @@ export class WeatherApplication {
     }
 
     /**
-     * Instantiates or in-place updates the temperature chart view.
-     *
      * @param {Array<{date: Date, minimumTemperature: number, maximumTemperature: number, condition: string, weatherIcon: string}>} dailyForecastList
      */
     renderForecastChart(dailyForecastList) {
-        const canvasElement = document.getElementById("forecast-chart-canvas");
-        const chartPanelElement = document.getElementById(
-            "forecast-chart-panel",
-        );
+        const canvasElement = document.getElementById(DOM_IDS.CHART_CANVAS);
+        const chartPanelElement = document.getElementById(DOM_IDS.CHART_PANEL);
 
         if (canvasElement === null || chartPanelElement === null) {
             return;
@@ -410,6 +393,9 @@ export class WeatherApplication {
             this.forecastChartView === null ||
             this.forecastChartView.canvasElement !== canvasElement
         ) {
+            if (this.forecastChartView !== null) {
+                this.forecastChartView.destroy();
+            }
             this.forecastChartView = new ForecastChartView({
                 canvasElement: canvasElement,
                 containerElement: chartPanelElement,

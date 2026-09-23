@@ -1,3 +1,6 @@
+import { API_ENDPOINTS } from "../constants/ApiEndpoints.js";
+import { APP_CONFIG } from "../constants/AppConfig.js";
+
 /**
  * Manages the collection of available cities loaded from a local JSON resource.
  */
@@ -5,7 +8,7 @@ export class CityRepository {
     /**
      * @param {string} [datasetUrl] Optional custom path to city list JSON file.
      */
-    constructor(datasetUrl = "/data/city.list.json") {
+    constructor(datasetUrl = API_ENDPOINTS.CITIES_DATASET) {
         this.datasetUrl = datasetUrl;
         /** @type {Array<{id: number, name: string, country: string, coord: {lat: number, lon: number}}>} */
         this.cityList = [];
@@ -66,10 +69,10 @@ export class CityRepository {
      * Searches for cities matching the search query.
      *
      * @param {string} searchQuery
-     * @param {number} [maxResults=10]
+     * @param {number} [maxResults]
      * @returns {Array<{id: number, name: string, country: string, coord: {lat: number, lon: number}}>}
      */
-    search(searchQuery, maxResults = 10) {
+    search(searchQuery, maxResults = APP_CONFIG.SEARCH_MAX_RESULTS) {
         if (typeof searchQuery !== "string") {
             return [];
         }
@@ -77,7 +80,7 @@ export class CityRepository {
         const normalizedQuery = this.normalizeText(searchQuery);
 
         // Minimum requirement: search begins at 3 characters
-        if (normalizedQuery.length < 3) {
+        if (normalizedQuery.length < APP_CONFIG.SEARCH_MIN_QUERY_LENGTH) {
             return [];
         }
 

@@ -1,20 +1,21 @@
+import { API_ENDPOINTS } from "../constants/ApiEndpoints.js";
+import { APP_CONFIG, SUPPORTED_LANGUAGES } from "../constants/AppConfig.js";
+import { TRANSLATION_KEYS } from "../constants/TranslationKeys.js";
+
 /**
  * Service responsible for loading, parsing, and providing multi-language translations from a CSV file.
  */
 export class TranslationService {
     /**
-     * @param {string} [csvUrl] URL to translations CSV file.
-     * @param {string} [defaultLanguage] Default fallback language code (e.g. 'cs', 'en', 'de', 'es', 'fr').
+     * @param {string} [csvUrl]
+     * @param {string} [defaultLanguage]
      */
-    constructor(csvUrl = "/data/translations.csv", defaultLanguage = "cs") {
+    constructor(
+        csvUrl = API_ENDPOINTS.TRANSLATIONS_DATASET,
+        defaultLanguage = APP_CONFIG.DEFAULT_LANGUAGE,
+    ) {
         this.csvUrl = csvUrl;
-        this.supportedLanguageList = [
-            { code: "cs", label: "🇨🇿 Čeština", intlLocale: "cs-CZ" },
-            { code: "en", label: "🇬🇧 English", intlLocale: "en-US" },
-            { code: "de", label: "🇩🇪 Deutsch", intlLocale: "de-DE" },
-            { code: "es", label: "🇪🇸 Español", intlLocale: "es-ES" },
-            { code: "fr", label: "🇫🇷 Français", intlLocale: "fr-FR" },
-        ];
+        this.supportedLanguageList = SUPPORTED_LANGUAGES;
 
         this.currentLanguage = this.detectInitialLanguage(defaultLanguage);
         /** @type {Map<string, Record<string, string>>} */
@@ -23,8 +24,6 @@ export class TranslationService {
     }
 
     /**
-     * Detects the user's preferred language from the browser or falls back to default.
-     *
      * @param {string} fallbackLanguage
      * @returns {string}
      */
@@ -50,11 +49,6 @@ export class TranslationService {
         return fallbackLanguage;
     }
 
-    /**
-     * Fetches and parses the CSV translations file.
-     *
-     * @returns {Promise<void>}
-     */
     async loadTranslations() {
         try {
             const response = await fetch(this.csvUrl);
@@ -76,8 +70,41 @@ export class TranslationService {
     }
 
     /**
-     * Parses raw CSV content into structured in-memory translation dictionary map.
+     * Splits a single CSV line into an array of cell values, respecting quotes and escaped commas (RFC 4180).
      *
+     * @param {string} line
+     * @returns {string[]}
+     */
+    splitCsvLine(line) {
+        const cellList = [];
+        let currentCell = "";
+        let insideQuotes = false;
+
+        for (let index = 0; index < line.length; index += 1) {
+            const char = line[index];
+            const nextChar = line[index + 1];
+
+            if (char === '"') {
+                if (insideQuotes && nextChar === '"') {
+                    // Escaped double quote ("" -> ")
+                    currentCell += '"';
+                    index += 1;
+                } else {
+                    insideQuotes = !insideQuotes;
+                }
+            } else if (char === "," && !insideQuotes) {
+                cellList.push(currentCell.trim());
+                currentCell = "";
+            } else {
+                currentCell += char;
+            }
+        }
+
+        cellList.push(currentCell.trim());
+        return cellList;
+    }
+
+    /**
      * @param {string} rawCsv
      */
     parseCsvContent(rawCsv) {
@@ -91,9 +118,9 @@ export class TranslationService {
         }
 
         const headerLine = lineList[0];
-        const headerColumnList = headerLine
-            .split(",")
-            .map((column) => column.trim().toLowerCase());
+        const headerColumnList = this.splitCsvLine(headerLine).map((column) =>
+            column.toLowerCase(),
+        );
 
         for (let index = 1; index < lineList.length; index += 1) {
             const line = lineList[index].trim();
@@ -101,7 +128,7 @@ export class TranslationService {
                 continue;
             }
 
-            const cellList = line.split(",");
+            const cellList = this.splitCsvLine(line);
             const translationKey = cellList[0]?.trim();
 
             if (translationKey === undefined || translationKey.length === 0) {
@@ -125,8 +152,6 @@ export class TranslationService {
     }
 
     /**
-     * Translates a given key into the currently active language.
-     *
      * @param {string} key
      * @param {string} [fallbackText]
      * @returns {string}
@@ -146,21 +171,20 @@ export class TranslationService {
             return translationEntry[this.currentLanguage];
         }
 
-        // Fallback to English if translation is missing in the current language
+        // Fallback to English in dictionary if translation is missing in the current language
         if (
             translationEntry !== undefined &&
-            typeof translationEntry["en"] === "string" &&
-            translationEntry["en"].length > 0
+            typeof translationEntry[APP_CONFIG.FALLBACK_LANGUAGE] ===
+                "string" &&
+            translationEntry[APP_CONFIG.FALLBACK_LANGUAGE].length > 0
         ) {
-            return translationEntry["en"];
+            return translationEntry[APP_CONFIG.FALLBACK_LANGUAGE];
         }
 
         return fallbackText.length > 0 ? fallbackText : key;
     }
 
     /**
-     * Translates an OpenWeather weather condition code (e.g. 'Clouds', 'Rain', 'Clear').
-     *
      * @param {string} conditionCode
      * @returns {string}
      */
@@ -169,7 +193,7 @@ export class TranslationService {
             typeof conditionCode !== "string" ||
             conditionCode.trim().length === 0
         ) {
-            return this.t("condition.Unknown", "Unknown");
+            return this.t(TRANSLATION_KEYS.CONDITION_UNKNOWN);
         }
 
         const translationKey = `condition.${conditionCode.trim()}`;
@@ -177,10 +201,8 @@ export class TranslationService {
     }
 
     /**
-     * Changes the active language code.
-     *
      * @param {string} languageCode
-     * @returns {boolean} True if language was changed successfully
+     * @returns {boolean}
      */
     setLanguage(languageCode) {
         const isSupported = this.supportedLanguageList.some(
@@ -195,20 +217,10 @@ export class TranslationService {
         return false;
     }
 
-    /**
-     * Returns the currently active language code (e.g. 'cs', 'en', 'de', 'es', 'fr').
-     *
-     * @returns {string}
-     */
     getLanguage() {
         return this.currentLanguage;
     }
 
-    /**
-     * Returns the corresponding full Intl locale string for the active language (e.g. 'cs-CZ', 'de-DE').
-     *
-     * @returns {string}
-     */
     getIntlLocale() {
         const languageConfig = this.supportedLanguageList.find(
             (lang) => lang.code === this.currentLanguage,
@@ -218,11 +230,6 @@ export class TranslationService {
             : "en-US";
     }
 
-    /**
-     * Returns the list of all supported language objects.
-     *
-     * @returns {Array<{code: string, label: string, intlLocale: string}>}
-     */
     getSupportedLanguages() {
         return this.supportedLanguageList;
     }

@@ -1,6 +1,12 @@
-/**
- * Manages the autocomplete UI component for city searching and selection.
- */
+import {
+    DOM_IDS,
+    CSS_CLASSES,
+    DOM_SELECTORS,
+} from "../constants/DomSelectors.js";
+import { APP_CONFIG } from "../constants/AppConfig.js";
+import { TRANSLATION_KEYS } from "../constants/TranslationKeys.js";
+import { ForecastView } from "../weather/ForecastView.js";
+
 export class CityAutocomplete {
     /**
      * @param {object} options
@@ -36,13 +42,12 @@ export class CityAutocomplete {
         this.handleKeyDown = this.handleKeyDown.bind(this);
         this.handleClickOutside = this.handleClickOutside.bind(this);
         this.handleClearClick = this.handleClearClick.bind(this);
+        this.handleResultsClick = this.handleResultsClick.bind(this);
+        this.handleResultsMouseOver = this.handleResultsMouseOver.bind(this);
 
         this.initialize();
     }
 
-    /**
-     * Sets up event listeners and ARIA accessibility attributes.
-     */
     initialize() {
         this.inputElement.setAttribute("role", "combobox");
         this.inputElement.setAttribute("aria-autocomplete", "list");
@@ -50,7 +55,7 @@ export class CityAutocomplete {
         this.inputElement.setAttribute("aria-haspopup", "listbox");
 
         this.resultsContainerElement.setAttribute("role", "listbox");
-        this.resultsContainerElement.id = "city-autocomplete-listbox";
+        this.resultsContainerElement.id = DOM_IDS.AUTOCOMPLETE_LISTBOX;
         this.inputElement.setAttribute(
             "aria-controls",
             this.resultsContainerElement.id,
@@ -58,6 +63,14 @@ export class CityAutocomplete {
 
         this.inputElement.addEventListener("input", this.handleInput);
         this.inputElement.addEventListener("keydown", this.handleKeyDown);
+        this.resultsContainerElement.addEventListener(
+            "click",
+            this.handleResultsClick,
+        );
+        this.resultsContainerElement.addEventListener(
+            "mouseover",
+            this.handleResultsMouseOver,
+        );
         document.addEventListener("click", this.handleClickOutside);
 
         if (this.clearButtonElement !== null) {
@@ -70,12 +83,17 @@ export class CityAutocomplete {
         this.updateClearButtonVisibility();
     }
 
-    /**
-     * Cleans up event listeners when component is destroyed.
-     */
     destroy() {
         this.inputElement.removeEventListener("input", this.handleInput);
         this.inputElement.removeEventListener("keydown", this.handleKeyDown);
+        this.resultsContainerElement.removeEventListener(
+            "click",
+            this.handleResultsClick,
+        );
+        this.resultsContainerElement.removeEventListener(
+            "mouseover",
+            this.handleResultsMouseOver,
+        );
         document.removeEventListener("click", this.handleClickOutside);
 
         if (this.clearButtonElement !== null) {
@@ -91,9 +109,6 @@ export class CityAutocomplete {
         }
     }
 
-    /**
-     * Handles user typing inside the search input with debounce.
-     */
     handleInput() {
         this.updateClearButtonVisibility();
 
@@ -103,7 +118,7 @@ export class CityAutocomplete {
 
         // If text was modified after a selection, reset selected city reference
         if (this.selectedCity !== null) {
-            const formattedSelectedCity = this.formatCityLabel(
+            const formattedSelectedCity = ForecastView.formatCityDisplayName(
                 this.selectedCity,
             );
             if (this.inputElement.value !== formattedSelectedCity) {
@@ -113,21 +128,21 @@ export class CityAutocomplete {
 
         this.debounceTimerId = window.setTimeout(() => {
             this.performSearch();
-        }, 180);
+        }, APP_CONFIG.SEARCH_DEBOUNCE_DELAY_MS);
     }
 
-    /**
-     * Executes the search against the city repository and updates the dropdown.
-     */
     performSearch() {
         const searchQuery = this.inputElement.value.trim();
 
-        if (searchQuery.length < 3) {
+        if (searchQuery.length < APP_CONFIG.SEARCH_MIN_QUERY_LENGTH) {
             this.closeResults();
             return;
         }
 
-        this.currentResultList = this.cityRepository.search(searchQuery, 10);
+        this.currentResultList = this.cityRepository.search(
+            searchQuery,
+            APP_CONFIG.SEARCH_MAX_RESULTS,
+        );
         this.highlightedIndex = -1;
 
         if (this.currentResultList.length > 0) {
@@ -140,15 +155,14 @@ export class CityAutocomplete {
     }
 
     /**
-     * Handles keyboard navigation inside the combobox.
-     *
      * @param {KeyboardEvent} event
      */
     handleKeyDown(event) {
         if (!this.isOpen) {
             if (
                 event.key === "ArrowDown" &&
-                this.inputElement.value.trim().length >= 3
+                this.inputElement.value.trim().length >=
+                    APP_CONFIG.SEARCH_MIN_QUERY_LENGTH
             ) {
                 event.preventDefault();
                 this.performSearch();
@@ -179,9 +193,7 @@ export class CityAutocomplete {
     }
 
     /**
-     * Moves the highlight index up or down through the list of results.
-     *
-     * @param {number} direction - 1 for next, -1 for previous
+     * @param {number} direction 1 for next, -1 for previous
      */
     navigateResults(direction) {
         if (this.currentResultList.length === 0) {
@@ -201,17 +213,17 @@ export class CityAutocomplete {
         this.updateHighlightState();
     }
 
-    /**
-     * Updates visual and ARIA highlight state on options.
-     */
     updateHighlightState() {
-        const optionElementList =
-            this.resultsContainerElement.querySelectorAll('[role="option"]');
+        const optionElementList = this.resultsContainerElement.querySelectorAll(
+            DOM_SELECTORS.OPTION_ROLE,
+        );
 
         optionElementList.forEach((optionElement, index) => {
             const isHighlighted = index === this.highlightedIndex;
             if (isHighlighted) {
-                optionElement.classList.add("autocomplete-option--highlighted");
+                optionElement.classList.add(
+                    CSS_CLASSES.AUTOCOMPLETE_OPTION_HIGHLIGHTED,
+                );
                 optionElement.setAttribute("aria-selected", "true");
                 this.inputElement.setAttribute(
                     "aria-activedescendant",
@@ -220,7 +232,7 @@ export class CityAutocomplete {
                 optionElement.scrollIntoView({ block: "nearest" });
             } else {
                 optionElement.classList.remove(
-                    "autocomplete-option--highlighted",
+                    CSS_CLASSES.AUTOCOMPLETE_OPTION_HIGHLIGHTED,
                 );
                 optionElement.setAttribute("aria-selected", "false");
             }
@@ -231,41 +243,30 @@ export class CityAutocomplete {
         }
     }
 
-    /**
-     * Renders the list of matched city options into the dropdown.
-     */
     renderResults() {
         this.resultsContainerElement.innerHTML = "";
 
         const listElement = document.createElement("ul");
-        listElement.className = "autocomplete-list";
+        listElement.className = CSS_CLASSES.AUTOCOMPLETE_LIST;
 
         this.currentResultList.forEach((city, index) => {
             const itemElement = document.createElement("li");
             itemElement.id = `city-option-${index}`;
-            itemElement.className = "autocomplete-option";
+            itemElement.className = CSS_CLASSES.AUTOCOMPLETE_OPTION;
             itemElement.setAttribute("role", "option");
             itemElement.setAttribute("aria-selected", "false");
+            itemElement.dataset.index = String(index);
 
             const cityNameSpan = document.createElement("span");
-            cityNameSpan.className = "autocomplete-option-name";
+            cityNameSpan.className = CSS_CLASSES.AUTOCOMPLETE_OPTION_NAME;
             cityNameSpan.textContent = city.name;
 
             const countrySpan = document.createElement("span");
-            countrySpan.className = "autocomplete-option-country";
+            countrySpan.className = CSS_CLASSES.AUTOCOMPLETE_OPTION_COUNTRY;
             countrySpan.textContent = city.country;
 
             itemElement.appendChild(cityNameSpan);
             itemElement.appendChild(countrySpan);
-
-            itemElement.addEventListener("mouseenter", () => {
-                this.highlightedIndex = index;
-                this.updateHighlightState();
-            });
-
-            itemElement.addEventListener("click", () => {
-                this.selectCity(city);
-            });
 
             listElement.appendChild(itemElement);
         });
@@ -274,31 +275,60 @@ export class CityAutocomplete {
     }
 
     /**
-     * Renders a message when no cities match the search query.
+     * @param {MouseEvent} event
      */
+    handleResultsClick(event) {
+        const optionElement = event.target.closest(DOM_SELECTORS.OPTION_ROLE);
+        if (
+            optionElement !== null &&
+            optionElement.dataset.index !== undefined
+        ) {
+            const index = parseInt(optionElement.dataset.index, 10);
+            if (
+                !isNaN(index) &&
+                index >= 0 &&
+                index < this.currentResultList.length
+            ) {
+                this.selectCity(this.currentResultList[index]);
+            }
+        }
+    }
+
+    /**
+     * @param {MouseEvent} event
+     */
+    handleResultsMouseOver(event) {
+        const optionElement = event.target.closest(DOM_SELECTORS.OPTION_ROLE);
+        if (
+            optionElement !== null &&
+            optionElement.dataset.index !== undefined
+        ) {
+            const index = parseInt(optionElement.dataset.index, 10);
+            if (!isNaN(index) && index !== this.highlightedIndex) {
+                this.highlightedIndex = index;
+                this.updateHighlightState();
+            }
+        }
+    }
+
     renderNoResults() {
         this.resultsContainerElement.innerHTML = "";
         const emptyNoticeElement = document.createElement("div");
-        emptyNoticeElement.className = "autocomplete-empty";
+        emptyNoticeElement.className = CSS_CLASSES.AUTOCOMPLETE_EMPTY;
         const noResultsMessage =
             this.translationService !== null
-                ? this.translationService.t(
-                      "search.noResults",
-                      "No matching cities found",
-                  )
+                ? this.translationService.t(TRANSLATION_KEYS.SEARCH_NO_RESULTS)
                 : "No matching cities found";
         emptyNoticeElement.textContent = noResultsMessage;
         this.resultsContainerElement.appendChild(emptyNoticeElement);
     }
 
     /**
-     * Selects a city, updates input value, closes dropdown and triggers callback.
-     *
      * @param {{id: number, name: string, country: string, coord: {lat: number, lon: number}}} city
      */
     selectCity(city) {
         this.selectedCity = city;
-        this.inputElement.value = this.formatCityLabel(city);
+        this.inputElement.value = ForecastView.formatCityDisplayName(city);
         this.updateClearButtonVisibility();
         this.closeResults();
 
@@ -308,8 +338,6 @@ export class CityAutocomplete {
     }
 
     /**
-     * Handles click on the clear button.
-     *
      * @param {MouseEvent} event
      */
     handleClearClick(event) {
@@ -317,9 +345,6 @@ export class CityAutocomplete {
         this.clearSearch();
     }
 
-    /**
-     * Clears the input field, resets selected city state, and focuses the input.
-     */
     clearSearch() {
         this.inputElement.value = "";
         this.selectedCity = null;
@@ -328,9 +353,6 @@ export class CityAutocomplete {
         this.inputElement.focus();
     }
 
-    /**
-     * Updates clear button visibility based on whether the input has text.
-     */
     updateClearButtonVisibility() {
         if (this.clearButtonElement === null) {
             return;
@@ -339,34 +361,12 @@ export class CityAutocomplete {
         this.clearButtonElement.hidden = !hasText;
     }
 
-    /**
-     * Formats a city object into standard "City, Country" display text.
-     *
-     * @param {{name: string, country: string}} city
-     * @returns {string}
-     */
-    formatCityLabel(city) {
-        if (city === null || city === undefined) {
-            return "";
-        }
-        if (city.country && city.country.length > 0) {
-            return `${city.name}, ${city.country}`;
-        }
-        return city.name;
-    }
-
-    /**
-     * Opens the dropdown container and updates ARIA expanded attribute.
-     */
     openResults() {
         this.isOpen = true;
         this.resultsContainerElement.hidden = false;
         this.inputElement.setAttribute("aria-expanded", "true");
     }
 
-    /**
-     * Closes the dropdown container and resets highlight state.
-     */
     closeResults() {
         this.isOpen = false;
         this.resultsContainerElement.hidden = true;
@@ -376,8 +376,6 @@ export class CityAutocomplete {
     }
 
     /**
-     * Closes dropdown when user clicks outside the autocomplete component.
-     *
      * @param {MouseEvent} event
      */
     handleClickOutside(event) {

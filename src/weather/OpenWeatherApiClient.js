@@ -1,3 +1,6 @@
+import { API_ENDPOINTS } from "../constants/ApiEndpoints.js";
+import { APP_CONFIG } from "../constants/AppConfig.js";
+
 /**
  * Client for communicating with the OpenWeather 5 Day / 3 Hour Forecast REST API with in-memory TTL caching.
  */
@@ -6,12 +9,12 @@ export class OpenWeatherApiClient {
      * @param {object} [options]
      * @param {string} [options.apiKey] Optional API key override. Defaults to VITE_OPENWEATHER_API_KEY.
      * @param {string} [options.baseUrl] Base URL for the forecast endpoint.
-     * @param {number} [options.cacheTtlInMilliseconds] Cache TTL in ms. Defaults to 10 minutes (600,000 ms) per OpenWeather recommendations.
+     * @param {number} [options.cacheTtlInMilliseconds] Cache TTL in ms. Defaults to 10 minutes per OpenWeather recommendations.
      */
     constructor({
         apiKey = import.meta.env.VITE_OPENWEATHER_API_KEY,
-        baseUrl = "https://api.openweathermap.org/data/2.5/forecast",
-        cacheTtlInMilliseconds = 10 * 60 * 1000,
+        baseUrl = API_ENDPOINTS.OPENWEATHER_FORECAST_BASE_URL,
+        cacheTtlInMilliseconds = APP_CONFIG.CACHE_TTL_MS,
     } = {}) {
         this.apiKey = apiKey;
         this.baseUrl = baseUrl;

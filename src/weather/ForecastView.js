@@ -1,6 +1,11 @@
-/**
- * Handles DOM rendering for the 5-day weather forecast, loading states, and error alerts.
- */
+import {
+    DOM_IDS,
+    DOM_SELECTORS,
+    CSS_CLASSES,
+} from "../constants/DomSelectors.js";
+import { TRANSLATION_KEYS } from "../constants/TranslationKeys.js";
+import { API_ENDPOINTS } from "../constants/ApiEndpoints.js";
+
 export class ForecastView {
     /**
      * @param {object} options
@@ -19,22 +24,17 @@ export class ForecastView {
     }
 
     /**
-     * Helper to translate key with fallback text.
-     *
      * @param {string} key
-     * @param {string} fallback
      * @returns {string}
      */
-    t(key, fallback) {
+    t(key) {
         if (this.translationService !== null) {
-            return this.translationService.t(key, fallback);
+            return this.translationService.t(key);
         }
-        return fallback;
+        return key;
     }
 
     /**
-     * Helper to translate weather condition.
-     *
      * @param {string} condition
      * @returns {string}
      */
@@ -46,40 +46,63 @@ export class ForecastView {
     }
 
     /**
-     * Renders the initial / empty prompt state.
+     * @param {{name: string, country?: string}} city
+     * @returns {string}
      */
+    static formatCityDisplayName(city) {
+        if (city === null || city === undefined) {
+            return "";
+        }
+        if (
+            typeof city.country === "string" &&
+            city.country.trim().length > 0
+        ) {
+            return `${city.name}, ${city.country}`;
+        }
+        return city.name;
+    }
+
+    renderTableHeaderHtml() {
+        return `
+      <tr>
+        <th scope="col">${this.escapeHtml(this.t(TRANSLATION_KEYS.TABLE_DATE))}</th>
+        <th scope="col">${this.escapeHtml(this.t(TRANSLATION_KEYS.TABLE_MIN_TEMP))}</th>
+        <th scope="col">${this.escapeHtml(this.t(TRANSLATION_KEYS.TABLE_MAX_TEMP))}</th>
+        <th scope="col">${this.escapeHtml(this.t(TRANSLATION_KEYS.TABLE_WEATHER))}</th>
+      </tr>
+    `;
+    }
+
     renderInitialState() {
         this.containerElement.innerHTML = `
       <section class="forecast-placeholder" aria-live="polite">
         <div class="forecast-placeholder-icon" aria-hidden="true">🌍</div>
-        <h2 class="forecast-placeholder-title">${this.escapeHtml(this.t("placeholder.title", "Choose a City"))}</h2>
-        <p class="forecast-placeholder-text">${this.escapeHtml(this.t("placeholder.text", "Type a city name in the search box above to view the 5-day weather forecast."))}</p>
+        <h2 class="forecast-placeholder-title">${this.escapeHtml(this.t(TRANSLATION_KEYS.PLACEHOLDER_TITLE))}</h2>
+        <p class="forecast-placeholder-text">${this.escapeHtml(this.t(TRANSLATION_KEYS.PLACEHOLDER_TEXT))}</p>
       </section>
     `;
     }
 
     /**
-     * Renders the loading indicator when fetching forecast data.
-     *
      * @param {string} cityName
      */
     renderLoadingState(cityName) {
-        const existingResultElement =
-            this.containerElement.querySelector(".forecast-result");
-        const loadingPrefix = this.t(
-            "loading.textPrefix",
-            "Loading 5-day forecast for",
+        const existingResultElement = this.containerElement.querySelector(
+            DOM_SELECTORS.FORECAST_RESULT,
         );
+        const loadingPrefix = this.t(TRANSLATION_KEYS.LOADING_TEXT_PREFIX);
 
         // If result shell is already mounted, show subtle loading state without destroying DOM
         if (existingResultElement !== null) {
             const citySubtitleElement = existingResultElement.querySelector(
-                ".forecast-city-subtitle",
+                DOM_SELECTORS.FORECAST_CITY_SUBTITLE,
             );
             if (citySubtitleElement !== null) {
                 citySubtitleElement.textContent = `${loadingPrefix} ${cityName}...`;
             }
-            existingResultElement.classList.add("forecast-result--loading");
+            existingResultElement.classList.add(
+                CSS_CLASSES.FORECAST_RESULT_LOADING,
+            );
             return;
         }
 
@@ -92,8 +115,6 @@ export class ForecastView {
     }
 
     /**
-     * Renders an error message to the user.
-     *
      * @param {string} errorMessage
      */
     renderErrorState(errorMessage) {
@@ -101,7 +122,7 @@ export class ForecastView {
       <section class="forecast-error" role="alert" aria-live="assertive">
         <div class="error-icon" aria-hidden="true">⚠️</div>
         <div class="error-content">
-          <h2 class="error-title">${this.escapeHtml(this.t("error.title", "Unable to load forecast"))}</h2>
+          <h2 class="error-title">${this.escapeHtml(this.t(TRANSLATION_KEYS.ERROR_TITLE))}</h2>
           <p class="error-message">${this.escapeHtml(errorMessage)}</p>
         </div>
       </section>
@@ -109,8 +130,6 @@ export class ForecastView {
     }
 
     /**
-     * Renders or updates the 5-day weather forecast table for the selected city.
-     *
      * @param {object} params
      * @param {{name: string, country: string}} params.city
      * @param {Array<{date: Date, minimumTemperature: number, maximumTemperature: number, condition: string, weatherIcon: string}>} params.dailyForecastList
@@ -122,20 +141,11 @@ export class ForecastView {
         onChartTabActivated = undefined,
     }) {
         if (dailyForecastList.length === 0) {
-            this.renderErrorState(
-                this.t(
-                    "error.noData",
-                    "No forecast data available for this location.",
-                ),
-            );
+            this.renderErrorState(this.t(TRANSLATION_KEYS.ERROR_NO_DATA));
             return;
         }
 
-        const cityDisplayName =
-            city.country && city.country.length > 0
-                ? `${city.name}, ${city.country}`
-                : city.name;
-
+        const cityDisplayName = ForecastView.formatCityDisplayName(city);
         let tableRowsHtml = "";
 
         for (let index = 0; index < dailyForecastList.length; index += 1) {
@@ -152,7 +162,7 @@ export class ForecastView {
             const translatedCondition = this.tCondition(
                 dailyForecast.condition,
             );
-            const iconUrl = `https://openweathermap.org/img/wn/${dailyForecast.weatherIcon}@2x.png`;
+            const iconUrl = `${API_ENDPOINTS.OPENWEATHER_ICON_BASE_URL}${dailyForecast.weatherIcon}@2x.png`;
 
             tableRowsHtml += `
         <tr>
@@ -176,22 +186,27 @@ export class ForecastView {
       `;
         }
 
-        const existingResultElement =
-            this.containerElement.querySelector(".forecast-result");
+        const existingResultElement = this.containerElement.querySelector(
+            DOM_SELECTORS.FORECAST_RESULT,
+        );
 
         // In-place update: reuse existing DOM elements, preserving canvas and active tab
         if (existingResultElement !== null) {
-            existingResultElement.classList.remove("forecast-result--loading");
+            existingResultElement.classList.remove(
+                CSS_CLASSES.FORECAST_RESULT_LOADING,
+            );
             const cityTitleElement = existingResultElement.querySelector(
-                ".forecast-city-title",
+                DOM_SELECTORS.FORECAST_CITY_TITLE,
             );
             const citySubtitleElement = existingResultElement.querySelector(
-                ".forecast-city-subtitle",
+                DOM_SELECTORS.FORECAST_CITY_SUBTITLE,
             );
-            const tableTabButtonElement =
-                existingResultElement.querySelector("#view-toggle-table");
-            const chartTabButtonElement =
-                existingResultElement.querySelector("#view-toggle-chart");
+            const tableTabButtonElement = existingResultElement.querySelector(
+                DOM_SELECTORS.VIEW_TOGGLE_TABLE,
+            );
+            const chartTabButtonElement = existingResultElement.querySelector(
+                DOM_SELECTORS.VIEW_TOGGLE_CHART,
+            );
             const tableHeadElement =
                 existingResultElement.querySelector("thead");
             const tableBodyElement =
@@ -202,31 +217,21 @@ export class ForecastView {
             }
             if (citySubtitleElement !== null) {
                 citySubtitleElement.textContent = this.t(
-                    "forecast.subtitle",
-                    "5-Day Weather Forecast",
+                    TRANSLATION_KEYS.FORECAST_SUBTITLE,
                 );
             }
             if (tableTabButtonElement !== null) {
                 tableTabButtonElement.textContent = this.t(
-                    "view.table",
-                    "📋 Table",
+                    TRANSLATION_KEYS.VIEW_TABLE,
                 );
             }
             if (chartTabButtonElement !== null) {
                 chartTabButtonElement.textContent = this.t(
-                    "view.chart",
-                    "📈 Chart",
+                    TRANSLATION_KEYS.VIEW_CHART,
                 );
             }
             if (tableHeadElement !== null) {
-                tableHeadElement.innerHTML = `
-          <tr>
-            <th scope="col">${this.escapeHtml(this.t("table.date", "Date"))}</th>
-            <th scope="col">${this.escapeHtml(this.t("table.minTemp", "Min Temperature"))}</th>
-            <th scope="col">${this.escapeHtml(this.t("table.maxTemp", "Max Temperature"))}</th>
-            <th scope="col">${this.escapeHtml(this.t("table.weather", "Weather"))}</th>
-          </tr>
-        `;
+                tableHeadElement.innerHTML = this.renderTableHeaderHtml();
             }
             if (tableBodyElement !== null) {
                 tableBodyElement.innerHTML = tableRowsHtml;
@@ -236,46 +241,41 @@ export class ForecastView {
 
         // Initial mount of the forecast result shell
         this.containerElement.innerHTML = `
-      <section class="forecast-result" aria-live="polite">
+      <section class="${CSS_CLASSES.FORECAST_RESULT}" aria-live="polite">
         <header class="forecast-result-header">
           <div class="forecast-result-header-main">
             <h2 class="forecast-city-title">${this.escapeHtml(cityDisplayName)}</h2>
-            <p class="forecast-city-subtitle">${this.escapeHtml(this.t("forecast.subtitle", "5-Day Weather Forecast"))}</p>
+            <p class="forecast-city-subtitle">${this.escapeHtml(this.t(TRANSLATION_KEYS.FORECAST_SUBTITLE))}</p>
           </div>
           <div class="view-toggle-group" role="tablist" aria-label="Forecast view mode">
             <button
               type="button"
-              id="view-toggle-table"
-              class="view-toggle-button view-toggle-button--active"
+              id="${DOM_IDS.VIEW_TOGGLE_TABLE}"
+              class="${CSS_CLASSES.VIEW_TOGGLE_BUTTON} ${CSS_CLASSES.VIEW_TOGGLE_BUTTON_ACTIVE}"
               role="tab"
               aria-selected="true"
-              aria-controls="forecast-table-panel"
+              aria-controls="${DOM_IDS.TABLE_PANEL}"
             >
-              ${this.escapeHtml(this.t("view.table", "📋 Table"))}
+              ${this.escapeHtml(this.t(TRANSLATION_KEYS.VIEW_TABLE))}
             </button>
             <button
               type="button"
-              id="view-toggle-chart"
-              class="view-toggle-button"
+              id="${DOM_IDS.VIEW_TOGGLE_CHART}"
+              class="${CSS_CLASSES.VIEW_TOGGLE_BUTTON}"
               role="tab"
               aria-selected="false"
-              aria-controls="forecast-chart-panel"
+              aria-controls="${DOM_IDS.CHART_PANEL}"
             >
-              ${this.escapeHtml(this.t("view.chart", "📈 Chart"))}
+              ${this.escapeHtml(this.t(TRANSLATION_KEYS.VIEW_CHART))}
             </button>
           </div>
         </header>
 
-        <div id="forecast-table-panel" class="forecast-view-panel" role="tabpanel" aria-labelledby="view-toggle-table">
+        <div id="${DOM_IDS.TABLE_PANEL}" class="forecast-view-panel" role="tabpanel" aria-labelledby="${DOM_IDS.VIEW_TOGGLE_TABLE}">
           <div class="forecast-table-container">
             <table class="forecast-table" aria-label="5-Day Weather Forecast for ${this.escapeHtml(cityDisplayName)}">
               <thead>
-                <tr>
-                  <th scope="col">${this.escapeHtml(this.t("table.date", "Date"))}</th>
-                  <th scope="col">${this.escapeHtml(this.t("table.minTemp", "Min Temperature"))}</th>
-                  <th scope="col">${this.escapeHtml(this.t("table.maxTemp", "Max Temperature"))}</th>
-                  <th scope="col">${this.escapeHtml(this.t("table.weather", "Weather"))}</th>
-                </tr>
+                ${this.renderTableHeaderHtml()}
               </thead>
               <tbody>
                 ${tableRowsHtml}
@@ -284,9 +284,9 @@ export class ForecastView {
           </div>
         </div>
 
-        <div id="forecast-chart-panel" class="forecast-view-panel" role="tabpanel" aria-labelledby="view-toggle-chart" hidden>
+        <div id="${DOM_IDS.CHART_PANEL}" class="forecast-view-panel" role="tabpanel" aria-labelledby="${DOM_IDS.VIEW_TOGGLE_CHART}" hidden>
           <div class="forecast-chart-wrapper">
-            <canvas id="forecast-chart-canvas"></canvas>
+            <canvas id="${DOM_IDS.CHART_CANVAS}"></canvas>
           </div>
         </div>
       </section>
@@ -296,20 +296,20 @@ export class ForecastView {
     }
 
     /**
-     * Binds click events to view toggle tab buttons.
-     *
      * @param {() => void} [onChartTabActivated]
      */
     bindViewTabs(onChartTabActivated) {
-        const tableButton =
-            this.containerElement.querySelector("#view-toggle-table");
-        const chartButton =
-            this.containerElement.querySelector("#view-toggle-chart");
+        const tableButton = this.containerElement.querySelector(
+            DOM_SELECTORS.VIEW_TOGGLE_TABLE,
+        );
+        const chartButton = this.containerElement.querySelector(
+            DOM_SELECTORS.VIEW_TOGGLE_CHART,
+        );
         const tablePanel = this.containerElement.querySelector(
-            "#forecast-table-panel",
+            DOM_SELECTORS.FORECAST_TABLE_PANEL,
         );
         const chartPanel = this.containerElement.querySelector(
-            "#forecast-chart-panel",
+            DOM_SELECTORS.FORECAST_CHART_PANEL,
         );
 
         if (
@@ -322,9 +322,9 @@ export class ForecastView {
         }
 
         tableButton.addEventListener("click", () => {
-            tableButton.classList.add("view-toggle-button--active");
+            tableButton.classList.add(CSS_CLASSES.VIEW_TOGGLE_BUTTON_ACTIVE);
             tableButton.setAttribute("aria-selected", "true");
-            chartButton.classList.remove("view-toggle-button--active");
+            chartButton.classList.remove(CSS_CLASSES.VIEW_TOGGLE_BUTTON_ACTIVE);
             chartButton.setAttribute("aria-selected", "false");
 
             tablePanel.hidden = false;
@@ -332,9 +332,9 @@ export class ForecastView {
         });
 
         chartButton.addEventListener("click", () => {
-            chartButton.classList.add("view-toggle-button--active");
+            chartButton.classList.add(CSS_CLASSES.VIEW_TOGGLE_BUTTON_ACTIVE);
             chartButton.setAttribute("aria-selected", "true");
-            tableButton.classList.remove("view-toggle-button--active");
+            tableButton.classList.remove(CSS_CLASSES.VIEW_TOGGLE_BUTTON_ACTIVE);
             tableButton.setAttribute("aria-selected", "false");
 
             chartPanel.hidden = false;
@@ -347,8 +347,6 @@ export class ForecastView {
     }
 
     /**
-     * Helper to escape HTML characters in strings for safe rendering.
-     *
      * @param {string} text
      * @returns {string}
      */
