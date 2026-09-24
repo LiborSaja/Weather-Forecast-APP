@@ -11,6 +11,7 @@ A lightweight, modern, client-only single-page web application that allows users
 - [Programming Paradigm & Architecture](#programming-paradigm--architecture)
 - [Prerequisites](#prerequisites)
 - [Installation & Running](#installation--running)
+- [Live Demo](#live-demo)
 - [Production Build](#production-build)
 - [OpenWeather City Data](#openweather-city-data)
 - [Forecast Processing](#forecast-processing)
@@ -32,9 +33,10 @@ Key characteristics:
 - **Single HTML page** without heavy routing abstractions.
 - **Race condition prevention** using `AbortController` and geolocation request tokens when switching between cities rapidly.
 - **Accessible UI** conforming to WAI-ARIA combobox and listbox patterns with efficient event delegation.
-- **🌐 Dual-language Dynamic Localization (CZ/EN)**: Live language switching with client-side RFC 4180 CSV parser (`translations.csv`).
+- **🌐 Multi-language Dynamic Localization (5 Languages)**: Live runtime language switching (🇨🇿 Čeština, 🇬🇧 English, 🇩🇪 Deutsch, 🇪🇸 Español, 🇫🇷 Français) powered by client-side RFC 4180 CSV parser (`translations.csv`).
 - **📍 Geolocation Support**: Instant 1-click weather detection for user's physical coordinates via native `navigator.geolocation`.
 - **📈 Interactive Temperature Chart**: Visual 5-day temperature curve using Chart.js with seamless Table/Chart toggle and memory leak prevention.
+- **🌦️ Custom SVG Favicon**: Lightweight vector favicon for browser tabs.
 
 ---
 
@@ -86,10 +88,11 @@ The application is architected strictly following an **Object-Oriented Programmi
 
 ## Installation & Running
 
-1. Clone or navigate to the project directory:
+1. Clone repository from GitHub:
 
     ```bash
-    cd "Weather Forecast APP"
+    git clone https://github.com/LiborSaja/Weather-Forecast-APP.git
+    cd "Weather-Forecast-APP"
     ```
 
 2. Install dependencies:
@@ -116,7 +119,14 @@ The application is architected strictly following an **Object-Oriented Programmi
     ```bash
     npm run dev
     ```
-    The application will be available at `http://localhost:3000`.
+    The application will be available locally at `http://localhost:3000`.
+
+---
+
+## Live Demo
+
+The application is deployed and live at:  
+👉 **[https://sajalibor.cz/projects/weather-forecast-app/](https://sajalibor.cz/projects/weather-forecast-app/)**
 
 ---
 
@@ -204,6 +214,7 @@ Weather Forecast APP/
 ├── .env.example                # Example environment file template
 │
 ├── public/
+│   ├── favicon.svg             # Vector weather favicon for browser tabs
 │   └── data/
 │       ├── city.list.json      # Local OpenWeather city database (Czech & World cities)
 │       └── translations.csv    # Localized CSV dictionary (RFC 4180 format)
